@@ -890,6 +890,7 @@ See info node `(magit)Debugging Tools' for more information."
                        "cond-let"
                        "llama"
                        "seq"
+                       "libgit"
                        "transient"
                        "with-editor"
                        ;; Obviously `magit' itself is needed too.
