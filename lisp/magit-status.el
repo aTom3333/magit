@@ -534,7 +534,7 @@ See also info node `(magit)Section Movement'."
   "Insert header sections appropriate for `magit-status-mode' buffers.
 The sections are inserted by running the functions on the hook
 `magit-status-headers-hook'."
-  (if (magit-rev-verify "HEAD")
+  (if (magit-rev-verify-head)
       (magit-insert-headers 'magit-status-headers-hook)
     (insert "In the beginning there was darkness\n\n")))
 

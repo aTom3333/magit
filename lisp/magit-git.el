@@ -1463,6 +1463,9 @@ string \"true\", otherwise return nil."
 (defun magit-rev-verify (rev)
   (magit-git-string "rev-parse" "--verify" rev))
 
+(cl-defgeneric magit-rev-verify-head ()
+  (magit-rev-verify "HEAD"))
+
 (defun magit-commit-p (rev)
   "Return commit oid for REV if it can be dereferences as a commit.
 Otherwise return nil.  Use `magit-commit-oid' if you actually need

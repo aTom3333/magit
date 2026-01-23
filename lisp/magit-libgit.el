@@ -76,6 +76,11 @@ If optional DIRECTORY is nil, then use `default-directory'."
          (unless noerror
            (signal 'magit-outside-git-repo default-directory)))))
 
+(cl-defmethod magit-rev-verify-head
+  (&context ((magit-gitimpl) (eql libgit)))
+  (and (magit--assert-default-directory)
+       (if-let ((repo (magit-libgit-repo)))
+           (libgit-reference-target (libgit-repository-head repo)))))
 ;;; _
 (provide 'magit-libgit)
 ;;; magit-libgit.el ends here
