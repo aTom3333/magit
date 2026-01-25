@@ -1312,7 +1312,7 @@ if you so desire."
            ;;
            ;; Check whether the file is inside the repository.
            (equal (or (cdr (assoc default-directory topdirs))
-                      (let ((top (magit-rev-parse-safe "--show-toplevel")))
+                      (let ((top (magit--parse-rev-toplevel)))
                         (push (cons default-directory top) topdirs)
                         top))
                   topdir)
@@ -1331,7 +1331,7 @@ is saved without asking, the user is asked about each modified
 buffer, which visits a file in the current repository.  Optional
 argument (the prefix) non-nil means save all with no questions."
   (interactive "P")
-  (when-let ((topdir (magit-rev-parse-safe "--show-toplevel")))
+  (when-let ((topdir (magit--rev-parse-toplevel)))
     (let ((save-some-buffers-action-alist
            `((?Y ,(##with-current-buffer %
                     (setq buffer-save-without-query t)

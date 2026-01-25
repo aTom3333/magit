@@ -951,6 +951,11 @@ not located inside a Git repository, then return nil."
                    gitdir)
       (push (cons topdir gitdir) magit--separated-gitdirs))))
 
+(cl-defgeneric magit--rev-parse-toplevel ()
+  "Return the absolute path to the toplevel of the current repository
+as given by git unprocessed."
+  (magit-rev-parse-safe "--show-toplevel"))
+
 (defun magit-toplevel (&optional directory)
   "Return the absolute path to the toplevel of the current repository.
 
@@ -974,7 +979,7 @@ returning the truename."
       (cons (or directory default-directory) 'magit-toplevel)
     (magit--with-safe-default-directory directory
       (cond-let*
-        ([topdir (magit-rev-parse-safe "--show-toplevel")]
+        ([topdir (magit--rev-parse-toplevel)]
          [topdir (magit-expand-git-file-name topdir)]
          (cond-let*
            (;; Always honor these settings.
@@ -997,7 +1002,7 @@ returning the truename."
             [updir->topdir
              (let ((default-directory updir))
                (and (string-equal (magit-rev-parse-safe "--show-cdup") "")
-                    (magit-rev-parse-safe "--show-toplevel")))]
+                    (magit--rev-parse-toplevel)))]
             [_(string-equal (magit-expand-git-file-name updir->topdir) topdir)]
             updir)
            ((concat (file-remote-p default-directory)

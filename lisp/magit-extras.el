@@ -780,7 +780,7 @@ The buffer is displayed using `magit-display-buffer', which see."
   (switch-to-buffer-other-frame buffer))
 
 (defun magit--read-repository-buffer (prompt)
-  (if-let ((topdir (magit-rev-parse-safe "--show-toplevel")))
+  (if-let ((topdir (magit--rev-parse-toplevel)))
       (read-buffer
        prompt (magit-get-mode-buffer 'magit-status-mode) t
        (pcase-lambda (`(,_ . ,buf))
@@ -793,7 +793,7 @@ The buffer is displayed using `magit-display-buffer', which see."
                          (and buffer-file-name
                               (string-match-p git-commit-filename-regexp
                                               buffer-file-name)))
-                     (equal (magit-rev-parse-safe "--show-toplevel")
+                     (equal (magit--rev-parse-toplevel)
                             topdir))))))
     (user-error "Not inside a Git repository")))
 

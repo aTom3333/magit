@@ -81,6 +81,14 @@ If optional DIRECTORY is nil, then use `default-directory'."
   (and (magit--assert-default-directory)
        (if-let ((repo (magit-libgit-repo)))
            (libgit-reference-target (libgit-repository-head repo)))))
+
+(cl-defmethod magit--rev-parse-toplevel
+  (&context ((magit-gitimpl) (eql libgit)))
+  (if-let ((repo (magit-libgit-repo)))
+      ;; It is probably unnecessary to trim the ending slash
+      ;; but it is done to match the base implementation
+      (string-trim-right (file-name-as-directory (libgit-repository-workdir repo)) "/")))
+
 ;;; _
 (provide 'magit-libgit)
 ;;; magit-libgit.el ends here
