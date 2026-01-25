@@ -66,9 +66,37 @@ If optional DIRECTORY is nil, then use `default-directory'."
         (cons default-directory 'magit-libgit-repo)
       (libgit-repository-open default-directory))))
 
+(defvar magit-libgit-compare-impl nil
+  "When this value is non-nil and the libgit implementation
+is used, every call to a overriden method will still call
+the base implementation and compare the return values, signaling
+an error if they are different.")
+
+(define-error 'magit-incorrect-libgit-impl
+    "Mismatch between the results returned byt the libgit implementation
+and the base implementation. (if you see that error, it means there is
+a bug in magit's libgit implementation, please open a bug report")
+
+(defmacro magit--defmethod (name args &rest body)
+  "Wrapper around cl-defmethod to define a libgit implementation of a
+generic method.
+
+The implementation will use the provided body but will additionally
+invoke the base implementation of the generic method and compare the
+result if the variable magit-libgit-compare-impl is non-nil."
+  (declare (indent defun))
+  `(cl-defmethod ,name ,args
+     (let ((libgit-result (progn ,@body)))
+       (if magit-libgit-compare-impl
+           (let ((base-result (cl-call-next-method)))
+             (if (equal libgit-result base-result)
+                 libgit-result
+               (signal 'magit-incorrect-libgit-impl (list libgit-result base-result))))
+         libgit-result))))
+
 ;;; Methods
 
-(cl-defmethod magit-bare-repo-p
+(magit--defmethod magit-bare-repo-p
   (&context ((magit-gitimpl) (eql libgit)) &optional noerror)
   (and (magit--assert-default-directory noerror)
        (if-let ((repo (magit-libgit-repo)))
@@ -76,13 +104,13 @@ If optional DIRECTORY is nil, then use `default-directory'."
          (unless noerror
            (signal 'magit-outside-git-repo default-directory)))))
 
-(cl-defmethod magit-rev-verify-head
+(magit--defmethod magit-rev-verify-head
   (&context ((magit-gitimpl) (eql libgit)))
   (and (magit--assert-default-directory)
        (if-let ((repo (magit-libgit-repo)))
            (libgit-reference-target (libgit-repository-head repo)))))
 
-(cl-defmethod magit--rev-parse-toplevel
+(magit--defmethod magit--rev-parse-toplevel
   (&context ((magit-gitimpl) (eql libgit)))
   (if-let ((repo (magit-libgit-repo)))
       ;; It is probably unnecessary to trim the ending slash
