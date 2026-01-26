@@ -1465,7 +1465,7 @@ Return t if the first (and usually only) output line is the
 string \"true\", otherwise return nil."
   (equal (magit-git-str "rev-parse" args) "true"))
 
-(defun magit-rev-verify (rev)
+(cl-defgeneric magit-rev-verify (rev)
   (magit-git-string "rev-parse" "--verify" rev))
 
 (cl-defgeneric magit-rev-verify-head ()

@@ -117,6 +117,13 @@ result if the variable magit-libgit-compare-impl is non-nil."
       ;; but it is done to match the base implementation
       (string-trim-right (file-name-as-directory (libgit-repository-workdir repo)) "/")))
 
+(magit--defmethod magit-rev-verify
+  (rev &context ((magit-gitimpl) (eql libgit)))
+  (ignore-error 'giterr-reference
+    (if-let ((repo (magit-libgit-repo))
+             (obj (libgit-revparse-single repo rev)))
+        (libgit-object-id obj))))
+
 ;;; _
 (provide 'magit-libgit)
 ;;; magit-libgit.el ends here
