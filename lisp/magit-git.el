@@ -916,6 +916,9 @@ Also see `magit-git-config-p'."
   (and$ (magit-gitdir)
         (if path (expand-file-name (convert-standard-filename path) $) $)))
 
+(cl-defgeneric magit--rev-parse-git-dir ()
+  (magit-rev-parse-safe "--git-dir"))
+
 (defun magit-gitdir (&optional directory)
   "Return the absolute and resolved path of the .git directory.
 
@@ -927,7 +930,7 @@ not located inside a Git repository, then return nil."
     (magit--with-refresh-cache (list default-directory 'magit-gitdir)
       (magit--with-safe-default-directory nil
         (and-let*
-            ((dir (magit-rev-parse-safe "--git-dir"))
+            ((dir (magit--rev-parse-git-dir))
              (dir (file-name-as-directory (magit-expand-git-file-name dir))))
           (if (file-remote-p dir)
               dir
@@ -1007,7 +1010,7 @@ returning the truename."
             updir)
            ((concat (file-remote-p default-directory)
                     (file-name-as-directory topdir)))))
-        ([gitdir (magit-rev-parse-safe "--git-dir")]
+        ([gitdir (magit--rev-parse-git-dir)]
          [gitdir (file-name-as-directory
                   (if (file-name-absolute-p gitdir)
                       ;; We might have followed a symlink.

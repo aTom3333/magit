@@ -124,6 +124,11 @@ result if the variable magit-libgit-compare-impl is non-nil."
              (obj (libgit-revparse-single repo rev)))
         (libgit-object-id obj))))
 
+(magit--defmethod magit--rev-parse-git-dir
+  (&context ((magit-gitimpl) (eql libgit)))
+  (or (getenv "GIT_DIR")
+      (if-let ((repo (magit-libgit-repo)))
+          (libgit-repository-path repo))))
 ;;; _
 (provide 'magit-libgit)
 ;;; magit-libgit.el ends here
