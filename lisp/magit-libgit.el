@@ -59,12 +59,10 @@
 (defun magit-libgit-repo (&optional directory)
   "Return an object for the repository in DIRECTORY.
 If optional DIRECTORY is nil, then use `default-directory'."
-  (and-let* ((default-directory
-              (let ((magit-inhibit-libgit t))
-                (magit-gitdir directory))))
+  (let ((default-directory (or directory default-directory)))
     (magit--with-refresh-cache
         (cons default-directory 'magit-libgit-repo)
-      (libgit-repository-open default-directory))))
+      (libgit-repository-open-ext default-directory 0 ""))))
 
 (defvar magit-libgit-compare-impl nil
   "When this value is non-nil and the libgit implementation
