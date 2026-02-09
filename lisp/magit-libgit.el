@@ -92,6 +92,11 @@ result if the variable magit-libgit-compare-impl is non-nil."
                (signal 'magit-incorrect-libgit-impl (list libgit-result base-result))))
          libgit-result))))
 
+(defun magit-libgit-normalize-path (path)
+  "Normalize the given path so that the libgit implementation will
+give the same result as the bas git implementation"
+  (string-trim-right (file-name-as-directory path) "/"))
+
 ;;; Methods
 
 (magit--defmethod magit-bare-repo-p
@@ -111,13 +116,11 @@ result if the variable magit-libgit-compare-impl is non-nil."
 (magit--defmethod magit--rev-parse-toplevel
   (&context ((magit-gitimpl) (eql libgit)))
   (if-let ((repo (magit-libgit-repo)))
-      ;; It is probably unnecessary to trim the ending slash
-      ;; but it is done to match the base implementation
-      (string-trim-right (file-name-as-directory (libgit-repository-workdir repo)) "/")))
+      (magit-libgit-normalize-path (libgit-repository-workdir repo))))
 
 (magit--defmethod magit-rev-verify
   (rev &context ((magit-gitimpl) (eql libgit)))
-  (ignore-error 'giterr-reference
+  (ignore-errors
     (if-let ((repo (magit-libgit-repo))
              (obj (libgit-revparse-single repo rev)))
         (libgit-object-id obj))))
@@ -126,7 +129,7 @@ result if the variable magit-libgit-compare-impl is non-nil."
   (&context ((magit-gitimpl) (eql libgit)))
   (or (getenv "GIT_DIR")
       (if-let ((repo (magit-libgit-repo)))
-          (libgit-repository-path repo))))
+          (magit-libgit-normalize-path (libgit-repository-path repo)))))
 ;;; _
 (provide 'magit-libgit)
 ;;; magit-libgit.el ends here
