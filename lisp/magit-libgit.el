@@ -92,10 +92,21 @@ result if the variable magit-libgit-compare-impl is non-nil."
                (signal 'magit-incorrect-libgit-impl (list libgit-result base-result))))
          libgit-result))))
 
-(defun magit-libgit-normalize-path (path)
+(defun magit-libgit-normalize-path (path &optional relative)
   "Normalize the given path so that the libgit implementation will
-give the same result as the bas git implementation"
-  (string-trim-right (file-name-as-directory path) "/"))
+give the same result as the base git implementation"
+  (progn
+    ;; Make path relative
+    (when relative
+      (setq path (file-relative-name path)))
+    ;; Remove trailing /
+    (setq path (string-trim-right (file-name-as-directory path) "/"))
+    ;; On Windows, make the drive letter uppercase
+    (when (and (not relative) (eq system-type 'windows-nt) (length> path 1) (equal (substring path 1 2) ":"))
+      (let ((drive-letter (substring path 0 1))
+            (rest-path (substring path 1)))
+        (setq path (concat (upcase drive-letter) rest-path))))
+    path))
 
 ;;; Methods
 
@@ -129,7 +140,7 @@ give the same result as the bas git implementation"
   (&context ((magit-gitimpl) (eql libgit)))
   (or (getenv "GIT_DIR")
       (if-let ((repo (magit-libgit-repo)))
-          (magit-libgit-normalize-path (libgit-repository-path repo)))))
+          (magit-libgit-normalize-path (libgit-repository-path repo) t))))
 ;;; _
 (provide 'magit-libgit)
 ;;; magit-libgit.el ends here
