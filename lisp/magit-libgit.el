@@ -108,6 +108,12 @@ give the same result as the base git implementation"
         (setq path (concat (upcase drive-letter) rest-path))))
     path))
 
+(defun magit-libgit-rev-verify-object (rev)
+  "Parse a given revision and return the git object it represents"
+  (ignore-errors
+    (if-let ((repo (magit-libgit-repo)))
+        (libgit-revparse-single repo rev))))
+
 ;;; Methods
 
 (magit--defmethod magit-bare-repo-p
@@ -131,10 +137,8 @@ give the same result as the base git implementation"
 
 (magit--defmethod magit-rev-verify
   (rev &context ((magit-gitimpl) (eql libgit)))
-  (ignore-errors
-    (if-let ((repo (magit-libgit-repo))
-             (obj (libgit-revparse-single repo rev)))
-        (libgit-object-id obj))))
+  (if-let ((obj (magit-libgit-rev-verify-object rev)))
+      (libgit-object-id obj)))
 
 (magit--defmethod magit--rev-parse-git-dir
   (&context ((magit-gitimpl) (eql libgit)))
