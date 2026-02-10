@@ -89,7 +89,10 @@ result if the variable magit-libgit-compare-impl is non-nil."
            (let ((base-result (cl-call-next-method)))
              (if (equal libgit-result base-result)
                  libgit-result
-               (signal 'magit-incorrect-libgit-impl (list libgit-result base-result))))
+               (progn
+                 (message "%s" (backtrace-to-string))
+                 (message "current directory: %s" default-directory)
+                 (signal 'magit-incorrect-libgit-impl (list libgit-result base-result)))))
          libgit-result))))
 
 (defun magit-libgit-normalize-path (path &optional relative)
